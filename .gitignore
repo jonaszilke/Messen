@@ -1,5 +1,11 @@
-# Ignore all .txt files except requirements.txt
+# Ignore all data files
 *.txt
+*.xlsx
+
+# Ignore logs
+*.log
+
+# Keep requirements
 !requirements.txt
 
 # Ignore Python bytecode files
