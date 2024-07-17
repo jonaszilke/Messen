@@ -2,10 +2,8 @@
 
 import time
 from selenium import webdriver
-from bs4 import BeautifulSoup
 from selenium.common.exceptions import TimeoutException
-import re
-import ToolsMesse
+from tools import ToolsMesse
 
 timeout = 20
 links = []
@@ -33,14 +31,14 @@ def main_function():
 
 def list():
     for i in range(1,26):
-        ToolsMesse.click_css_link(browser, 'li.eat-and-style-exhibitor-list-content-results-item:nth-child('+str(i)+') > div:nth-child(1) > span:nth-child(3) > a:nth-child(1)')
+        ToolsMesse.click_css_link(browser, 'li.eat-and-style-exhibitor-list-content-results-item:nth-child(' + str(i) + ') > div:nth-child(1) > span:nth-child(3) > a:nth-child(1)')
         time.sleep(1)
         exhibitor()
         time.sleep(1)
-        ToolsMesse.click_css_link(browser,'.eat-and-style-exhibitor-details-content-header > a:nth-child(2)')
+        ToolsMesse.click_css_link(browser, '.eat-and-style-exhibitor-details-content-header > a:nth-child(2)')
 
 def exhibitor():
-    adress = ToolsMesse.getinformationfromcsslink(browser,'.eat-and-style-exhibitor-details-content-address-inner > address:nth-child(2)').splitlines()
+    adress = ToolsMesse.getinformationfromcsslink(browser, '.eat-and-style-exhibitor-details-content-address-inner > address:nth-child(2)').splitlines()
     # print(name + "\t" + adress[0])
     # web = ToolsMesse.getinformationfromcsslink(browser, '.eat-and-style-exhibitor-details-content-contact-inner > span:nth-child(2) > a:nth-child(2)')
     # tel = ToolsMesse.getinformationfromcsslink(browser, '.eat-and-style-exhibitor-details-content-contact-inner > span:nth-child(3) > a:nth-child(2)')

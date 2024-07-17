@@ -1,11 +1,7 @@
 # coding: utf8
 
-import time
 from selenium import webdriver
-from bs4 import BeautifulSoup
-from selenium.common.exceptions import TimeoutException
-import re
-import ToolsMesse
+from tools import ToolsMesse
 
 timeout = 20
 links = []
@@ -17,15 +13,15 @@ file.write('Name\tStraße\tPLZ\tOrt\tLand\tTelefon\tFax\tMail\tWeb\n')
 
 browser.get("https://bst.vds.de/messe-info/ausstellerverzeichnis/")
 
-ToolsMesse.click_css_link(browser,"div.col-md-3:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > ul:nth-child(1) > li:nth-child(1) > ul:nth-child(2) > li:nth-child(1) > a:nth-child(1)")
+ToolsMesse.click_css_link(browser, "div.col-md-3:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > ul:nth-child(1) > li:nth-child(1) > ul:nth-child(2) > li:nth-child(1) > a:nth-child(1)")
 
 
 def main_function():
     for i in range(2,115):
         x = []
-        x.append(ToolsMesse.getinformationfromcsslink(browser, "div.panel:nth-child("+str(i)+") > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > h3:nth-child(2)"))
+        x.append(ToolsMesse.getinformationfromcsslink(browser, "div.panel:nth-child(" + str(i) + ") > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > h3:nth-child(2)"))
         for j in [1,2]:
-            x.append(ToolsMesse.getinformationfromcsslink(browser, "div.panel:nth-child("+str(i)+") > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > ul:nth-child(3) > li:nth-child("+str(j)+")"))
+            x.append(ToolsMesse.getinformationfromcsslink(browser, "div.panel:nth-child(" + str(i) + ") > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > ul:nth-child(3) > li:nth-child(" + str(j) + ")"))
         x.append(browser.find_element_by_css_selector("div.panel:nth-child("+str(i)+") > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > ul:nth-child(3) > li:nth-child(4) > a:nth-child(2)").get_attribute("href"))
         while '' in x:
             x.remove('')

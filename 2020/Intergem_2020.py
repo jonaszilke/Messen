@@ -1,7 +1,6 @@
 # coding: utf8
 
 from selenium import webdriver
-import ToolsMesse
 
 browser = webdriver.Chrome()
 browser.get("https://intergem.de/liste/?wpbdp_view=all_listings")

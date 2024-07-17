@@ -2,8 +2,7 @@
 
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
-import ToolsMesse
-
+from tools import ToolsMesse
 
 browser = webdriver.Chrome()
 browser.get("https://www.provention-erfurt.de/aussteller/ausstellerliste-2020/")

@@ -1,15 +1,8 @@
 # coding: utf8
 
 from selenium import webdriver
-import ToolsMesse
-from selenium.common.exceptions import TimeoutException
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
+from tools import ToolsMesse
 import time
-from bs4 import BeautifulSoup
-import re
 
 timeout = 1
 

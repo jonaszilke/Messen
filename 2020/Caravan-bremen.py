@@ -2,9 +2,7 @@
 
 import time
 from selenium import webdriver
-from bs4 import BeautifulSoup
-import re
-import ToolsMesse
+from tools import ToolsMesse
 
 timeout = 20
 links = []

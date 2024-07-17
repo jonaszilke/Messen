@@ -1,9 +1,7 @@
 # coding: utf8
 
-import time
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
-import ToolsMesse
+from tools import ToolsMesse
 
 timeout = 20
 

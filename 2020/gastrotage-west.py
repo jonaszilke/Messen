@@ -1,7 +1,7 @@
 # coding: utf8
 
 from selenium import webdriver
-import ToolsMesse
+from tools import ToolsMesse
 
 browser = webdriver.Firefox()
 browser.get("http://www.gastrotage-west.de/ausstellerliste-2020.html?L=0")

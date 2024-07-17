@@ -1,7 +1,7 @@
 from selenium.common.exceptions import TimeoutException
 
-from ToolsMesse import Tools, RunMode
-from exhibitor import Exhibitor
+from tools.ToolsMesse import Tools, RunMode
+from tools.exhibitor import Exhibitor
 
 
 tools = Tools(RunMode.RUN)
