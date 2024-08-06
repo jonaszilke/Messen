@@ -1,3 +1,5 @@
+import re
+
 class Exhibitor:
     def __init__(self, name="", street="", postcode="", city="", country="", tel="", fax="", mail="", url="", info=""):
         self.name: str = name
@@ -43,3 +45,35 @@ class Exhibitor:
 
     def add_info(self, info: str):
         self.info = ';'.join([self.info, info.replace('\n', ';')]) if self.info != "" else info.replace('\n', ';')
+
+    def sort_string(self, info: str):
+        info = info.strip()
+        if self._is_phone(info):
+            self.add_tel_or_fax(info)
+        elif self._is_mail(info):
+            self.mail = info
+        elif self._is_url(info):
+            self.url = info
+
+
+    @staticmethod
+    def _is_phone(info: str):
+        info = info.replace(" ", "")
+        phone_pattern = r'\+?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}'
+        return re.fullmatch(phone_pattern, info)
+
+    @staticmethod
+    def _is_mail(info: str):
+        email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+        return re.fullmatch(email_pattern, info)
+
+    @staticmethod
+    def _is_url(info: str):
+        url_pattern = r'[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
+        return re.fullmatch(url_pattern, info)
+
+    @staticmethod
+    def _is_url(info: str):
+        url_pattern = r'[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
+        return re.fullmatch(url_pattern, info)
+

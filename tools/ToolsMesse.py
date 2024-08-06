@@ -32,14 +32,15 @@ class Tools:
         self.timeout = 10
 
     def __del__(self):
-        if self.run_mode == RunMode.RUN:
-            self.driver.quit()
+        self.driver.quit()
         self.file.close()
 
     def init_file(self):
+        if not os.path.exists('data'):
+            os.makedirs('data')
         time_string = datetime.now().strftime('%Y%m%d_%H%M')
         file_name = self.name if self.run_mode != RunMode.RUN else f'{self.name}_full_{time_string}'
-        file = open(f'{file_name}.txt', 'w', encoding='utf-8')
+        file = open(fr'data\{file_name}.txt', 'w', encoding='utf-8')
         file.write('Name\tStraße\tPLZ\tOrt\tLand\tTelefon\tFax\tE-Mail\tUrl\tInfo\n')
         return file
 
@@ -72,6 +73,8 @@ class Tools:
             raise ElementNotInteractableException
 
     def get_information_from_css_link(self, css_link, throw_exception=False, timeout=None):
+        if css_link == "":
+            return ""
         timeout: int = timeout if timeout is not None else self.timeout
         try:
             element_present = EC.presence_of_element_located((By.CSS_SELECTOR, css_link))
@@ -136,11 +139,11 @@ class Tools:
         print(exhibitor.name)
 
     def log_error(self, message: str):
-        with open(self.name + '_error_log.txt', 'a', encoding='utf-8') as f:
+        with open('data/' + self.name + '_error_log.txt', 'a', encoding='utf-8') as f:
             f.write(message + '\n')
 
     def remove_old_log_file(self):
-        file_path = self.name + '_error_log.txt'
+        file_path = 'data/' + self.name + '_error_log.txt'
         if os.path.exists(file_path):
             os.remove(file_path)
 
