@@ -1,15 +1,18 @@
+import time
+
 from selenium.common.exceptions import TimeoutException
 
 from tools.ToolsMesse import Tools, RunMode
 from tools.exhibitor import Exhibitor
 
-exhibitor_list_link = ""  
-tools = Tools(RunMode.TESTING)
+exhibitor_list_link = "https://outdoorexhibitors.ispo.com/onlinecatalog/2024/list-of-exhibitors/"
+tools = Tools(RunMode.RUN)
 
 
 def accept_cookies():
-    css_accept = ''  
-    tools.click_css_link(css_accept)
+    input("Accept Cookies!!")
+
+
 
 
 def get_exhibitor_links():
@@ -17,40 +20,48 @@ def get_exhibitor_links():
     if len(links) != 0:
         return links
 
-    # tools.scroll()
-    filter_str = ''
-    prefix = ''
-    links = [prefix + l for l in tools.find_links(filter_str=filter_str)]
+    css_next = 'div.paging_RightArrows_cell'
+    filter_str = 'https://outdoorexhibitors.ispo.com/onlinecatalog/2024/list-of-exhibitors/exhibitordetails'
+
+    for _ in range(41):
+        try:
+            links += tools.find_links(filter_str=filter_str)
+            tools.click_css_link(css_next)
+            time.sleep(20)
+        except TimeoutException:
+            break
 
     tools.save_links(links)
     return links
 
 
 def parse_exhibitor(ex: Exhibitor):
-    css_name = ''  
-    css_street = ''  
-    css_postcode = ''  
-    css_city = ''  
-    css_country = ''  
-    css_url = ''  
-    css_info = ''  
-    css_tel = ''  
-    css_mail = ''  
-    css_fax = ''  
+    css_name = 'div.ce_head'
+    css_address = 'div.ce_addr'
+    css_url = 'div.ce_website a'
+    css_info = 'div.pb_ce'
+    css_tel = 'div.ce_phone a'
+    css_mail = 'div.ce_email a'
 
     ex.name = tools.get_information_from_css_link(css_name)
     ex.url = tools.get_information_from_css_link(css_url, timeout=0.5)
     ex.tel = tools.get_information_from_css_link(css_tel, timeout=0.5)
     ex.mail = tools.get_information_from_css_link(css_mail, timeout=0.5)
-    ex.fax = tools.get_information_from_css_link(css_fax, timeout=0.5)
 
-    ex.street = tools.get_information_from_css_link(css_street, timeout=0.5)
-    ex.postcode = tools.get_information_from_css_link(css_postcode, timeout=0.5)
-    ex.city = tools.get_information_from_css_link(css_city, timeout=0.5)
-    ex.country = tools.get_information_from_css_link(css_country, timeout=0.5)
+    address = tools.get_information_from_css_link(css_address, timeout=0.5)
+    address_split = address.split(',')
+    if len(address_split) == 3:
+        ex.sort_address(address_split)
+    elif len(address_split) < 3:
+        ex.country = address_split[-1]
+        ex.city = address_split[-2]
+        ex.street = address_split[:-2]
+    else:
+        ex.street = address
 
     info = tools.get_information_from_css_link(css_info, timeout=0.5)
 
+    ex.add_info(address)
     ex.add_info(info)
 
     if tools.run_mode == RunMode.TESTING:

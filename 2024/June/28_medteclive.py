@@ -3,12 +3,12 @@ from selenium.common.exceptions import TimeoutException
 from tools.ToolsMesse import Tools, RunMode
 from tools.exhibitor import Exhibitor
 
-exhibitor_list_link = ""  
-tools = Tools(RunMode.TESTING)
+exhibitor_list_link = "https://www.medteclive.com/de/aussteller-und-anbieter"
+tools = Tools(RunMode.RUN)
 
 
 def accept_cookies():
-    css_accept = ''  
+    css_accept = '#cmpbntyestxt'
     tools.click_css_link(css_accept)
 
 
@@ -17,9 +17,9 @@ def get_exhibitor_links():
     if len(links) != 0:
         return links
 
-    # tools.scroll()
-    filter_str = ''
-    prefix = ''
+    tools.scroll()
+    filter_str = '/de/p/'
+    prefix = 'https://www.medteclive.com'
     links = [prefix + l for l in tools.find_links(filter_str=filter_str)]
 
     tools.save_links(links)
@@ -27,27 +27,13 @@ def get_exhibitor_links():
 
 
 def parse_exhibitor(ex: Exhibitor):
-    css_name = ''  
-    css_street = ''  
-    css_postcode = ''  
-    css_city = ''  
-    css_country = ''  
-    css_url = ''  
-    css_info = ''  
-    css_tel = ''  
-    css_mail = ''  
-    css_fax = ''  
+    css_name = 'div.column.name'
+    css_url = 'body > main > section:nth-child(3) > div > div > div.column.two-thirds-sidebar > ul > li:nth-child(2) > a'
+    css_info = 'body > main > section:nth-child(3) > div > div > div.column.two-thirds-sidebar > p'
 
-    ex.name = tools.get_information_from_css_link(css_name)
+
+    ex.name = tools.get_information_from_css_link(css_name).replace('\nFolgen Merken', '')
     ex.url = tools.get_information_from_css_link(css_url, timeout=0.5)
-    ex.tel = tools.get_information_from_css_link(css_tel, timeout=0.5)
-    ex.mail = tools.get_information_from_css_link(css_mail, timeout=0.5)
-    ex.fax = tools.get_information_from_css_link(css_fax, timeout=0.5)
-
-    ex.street = tools.get_information_from_css_link(css_street, timeout=0.5)
-    ex.postcode = tools.get_information_from_css_link(css_postcode, timeout=0.5)
-    ex.city = tools.get_information_from_css_link(css_city, timeout=0.5)
-    ex.country = tools.get_information_from_css_link(css_country, timeout=0.5)
 
     info = tools.get_information_from_css_link(css_info, timeout=0.5)
 

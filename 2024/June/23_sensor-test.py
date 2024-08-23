@@ -3,12 +3,12 @@ from selenium.common.exceptions import TimeoutException
 from tools.ToolsMesse import Tools, RunMode
 from tools.exhibitor import Exhibitor
 
-exhibitor_list_link = ""  
-tools = Tools(RunMode.TESTING)
+exhibitor_list_link = "https://www.sensor-test.de/de/besucher/suche-ap/exhibitors"
+tools = Tools(RunMode.RUN)
 
 
 def accept_cookies():
-    css_accept = ''  
+    css_accept = 'button.button.ccm--save-settings.ccm--button-primary.ccm--ctrl-init'
     tools.click_css_link(css_accept)
 
 
@@ -17,38 +17,37 @@ def get_exhibitor_links():
     if len(links) != 0:
         return links
 
-    # tools.scroll()
-    filter_str = ''
-    prefix = ''
-    links = [prefix + l for l in tools.find_links(filter_str=filter_str)]
+    import string
+    for letter in list(string.ascii_uppercase):
+        ex_link = f'https://www.sensor-test.de/de/besucher/suche-ap/exhibitors/{letter}'
+        tools.open_link(ex_link)
+
+        filter_str = '/de/besucher/suche-ap/exhibitor/'
+        prefix = 'https://www.sensor-test.de'
+        links += [prefix + l for l in tools.find_links(filter_str=filter_str) if '#product-news' not in l]
 
     tools.save_links(links)
     return links
 
 
 def parse_exhibitor(ex: Exhibitor):
-    css_name = ''  
-    css_street = ''  
+    css_name = '.title-logo h2'
+    css_address = 'div.address'
     css_postcode = ''  
     css_city = ''  
     css_country = ''  
     css_url = ''  
-    css_info = ''  
+    css_info = '.exhibitor-catalogue-entry div.text-image p'
     css_tel = ''  
     css_mail = ''  
     css_fax = ''  
 
     ex.name = tools.get_information_from_css_link(css_name)
-    ex.url = tools.get_information_from_css_link(css_url, timeout=0.5)
-    ex.tel = tools.get_information_from_css_link(css_tel, timeout=0.5)
-    ex.mail = tools.get_information_from_css_link(css_mail, timeout=0.5)
-    ex.fax = tools.get_information_from_css_link(css_fax, timeout=0.5)
 
-    ex.street = tools.get_information_from_css_link(css_street, timeout=0.5)
-    ex.postcode = tools.get_information_from_css_link(css_postcode, timeout=0.5)
-    ex.city = tools.get_information_from_css_link(css_city, timeout=0.5)
-    ex.country = tools.get_information_from_css_link(css_country, timeout=0.5)
+    data = tools.get_information_from_css_link(css_address, timeout=0.5).splitlines()
 
+    for d in data:
+        ex.sort_string(d)
     info = tools.get_information_from_css_link(css_info, timeout=0.5)
 
     ex.add_info(info)

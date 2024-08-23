@@ -29,6 +29,8 @@ class Tools:
         self.driver = WebDriverFactory.create_driver(browser_type)
         self.name = self.get_initial_script_name()
         self.file = self.init_file()
+        self.link_file_path = fr'data\{self.name}_exhibitor_links.txt'
+        self.log_file_path = fr'data\{self.name}_error_log.txt'
         self.timeout = 10
 
     def __del__(self):
@@ -65,9 +67,9 @@ class Tools:
         except NoSuchElementException:
             element = self.driver.find_element(By.CSS_SELECTOR, css_link)
             self.driver.execute_script("arguments[0].click();", element)
+            raise NoSuchElementException
         except TimeoutException:
-            if self.run_mode == RunMode.DEBUG:
-                print("Time")
+            raise TimeoutException
         except ElementNotInteractableException:
             # just for clearance
             raise ElementNotInteractableException
@@ -139,16 +141,42 @@ class Tools:
         print(exhibitor.name)
 
     def log_error(self, message: str):
-        with open('data/' + self.name + '_error_log.txt', 'a', encoding='utf-8') as f:
+        with open(self.log_file_path, 'a', encoding='utf-8') as f:
             f.write(message + '\n')
 
     def remove_old_log_file(self):
-        file_path = 'data/' + self.name + '_error_log.txt'
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        if os.path.exists(self.log_file_path):
+            os.remove(self.log_file_path)
 
     def back(self):
         self.driver.back()
+
+    def get_saved_links(self):
+        if os.path.exists(self.link_file_path):
+            with open(self.link_file_path, 'r') as file:
+                links = [link.replace('\n', '') for link in file.readlines() if link != '\n']
+                return links
+        return []
+
+    def save_links(self, links):
+        with open(self.link_file_path, 'w') as file:
+            file.write('\n'.join(links))
+
+    def wait_for_element(self, css_link: str, timeout=None):
+        timeout: int = timeout if timeout is not None else self.timeout
+        try:
+            WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((By.CSS_SELECTOR, css_link)))
+        except TimeoutException:
+            return False
+        return True
+
+    def reload_driver(self):
+        self.driver.quit()
+        self.driver = WebDriverFactory.create_driver(browser_type)
+
+    def scroll_into_view(self, css_link: str):
+        element = self.driver.find_element(By.CSS_SELECTOR, css_link)
+        self.driver.execute_script("arguments[0].scrollIntoView();", element)
 
 class WebDriverFactory:
     @staticmethod

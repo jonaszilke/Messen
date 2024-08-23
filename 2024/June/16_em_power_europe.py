@@ -1,13 +1,11 @@
 import os
-import time
-
-from selenium.common.exceptions import TimeoutException
 
 from tools.ToolsMesse import Tools, RunMode
 from tools.exhibitor import Exhibitor
 
-exhibitor_list_link = "https://www.ees-europe.com/ausstellerliste"
-tools = Tools(RunMode.TESTING)
+prefix = "https://www.em-power.eu"
+exhibitor_list_link = prefix + "/ausstellerliste"
+tools = Tools(RunMode.RUN)
 
 
 def accept_cookies():
@@ -15,48 +13,46 @@ def accept_cookies():
 
 
 def get_exhibitor_links():
-    file_path = 'ees_exhibitor_links.txt'
-    if os.path.exists(file_path):
-        # If the file doesn't exist, create it
-        with open(file_path, 'r') as file:
-            return file.readlines()
+    links = tools.get_saved_links()
+    if len(links) != 0:
+        return links
 
     # Links not leaded yet
     input("Please scroll to the end of the site until all exhibitors are loaded")
     filter_str = '/ausstellerliste/'
     links = tools.find_links(filter_str=filter_str)
-    prefix = 'https://www.ees-europe.com'
     links = [prefix + l for l in links]
 
-    with open(file_path, 'w') as file:
-        file.write('\n'.join(links))
+    tools.save_links(links)
+
     return links
 
 
 def parse_exhibitor(ex: Exhibitor):
     css_name = 'body > div.content.content-detail.content-detail-exhibitor > div.content-detail-main > div > div.content-data-headline > h1'
-    css_street = ''  # TODO
-    css_postcode = ''  # TODO
-    css_city = ''  # TODO
-    css_country = ''  # TODO
     css_url = 'body > div.content.content-detail.content-detail-exhibitor > div.content-detail-related > div > div:nth-child(4) > dl > dt:nth-child(5)'
-    css_info = 'body > div.content.content-detail.content-detail-exhibitor > div.content-detail-related > div > div:nth-child(4) > dl > dt:nth-child(7)'
+    css_info = 'body > div.content.content-detail.content-detail-exhibitor > div.content-detail-related > div > div:nth-child(2)'
+    css_address = 'body > div.content.content-detail.content-detail-exhibitor > div.content-detail-related > div > div:nth-child(4) > dl > dt:nth-child(7)'
     css_tel = 'body > div.content.content-detail.content-detail-exhibitor > div.content-detail-related > div > div:nth-child(4) > dl > dt:nth-child(1)'
     css_mail = 'body > div.content.content-detail.content-detail-exhibitor > div.content-detail-related > div > div:nth-child(4) > dl > dt:nth-child(3)'
-    css_fax = ''  # TODO
+
+    data = []
 
     ex.name = tools.get_information_from_css_link(css_name)
-    ex.url = tools.get_information_from_css_link(css_url)
-    ex.tel = tools.get_information_from_css_link(css_tel)
-    ex.mail = tools.get_information_from_css_link(css_mail)
-    ex.fax = tools.get_information_from_css_link(css_fax)
 
-    ex.street = tools.get_information_from_css_link(css_street)
-    ex.postcode = tools.get_information_from_css_link(css_postcode)
-    ex.city = tools.get_information_from_css_link(css_city)
-    ex.country = tools.get_information_from_css_link(css_country)
+    data.append(tools.get_information_from_css_link(css_url, timeout=0.5))
+    data.append(tools.get_information_from_css_link(css_tel, timeout=0.5))
+    data.append(tools.get_information_from_css_link(css_mail, timeout=0.5))
 
-    info = tools.get_information_from_css_link(css_info)
+    address_str = tools.get_information_from_css_link(css_address, timeout=0.5)
+    data += address_str.splitlines()[1:-1]
+    data += address_str.splitlines()[-1].split(',')
+    for i in data:
+        ex.sort_string(i)
+        ex.add_info(i)
+
+
+    info = tools.get_information_from_css_link(css_info, timeout=0.5)
 
     ex.add_info(info)
 
@@ -74,7 +70,7 @@ if __name__ == "__main__":
         try:
             tools.open_link(link)
             parse_exhibitor(exhibitor)
-        except TimeoutException:
+        except Exception:
             tools.log_error(link)
         finally:
             tools.save_exhibitor(exhibitor)

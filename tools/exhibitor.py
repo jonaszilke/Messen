@@ -33,9 +33,9 @@ class Exhibitor:
             city = city.replace('DE ', '', 1).replace('D-', '', 1)
             self.country = 'Deutschland'
         city = city.strip()
-
-        self.postcode = city[:5]
-        self.city = city[6:]
+        split_city = city.split(' ', 1)
+        self.postcode = split_city[0]
+        self.city = split_city[1]
 
     def add_tel_or_fax(self, info: str):
         if self.tel == '':
@@ -48,12 +48,47 @@ class Exhibitor:
 
     def sort_string(self, info: str):
         info = info.strip()
+        if info == "" or info == self.name:
+            return
         if self._is_phone(info):
             self.add_tel_or_fax(info)
         elif self._is_mail(info):
             self.mail = info
         elif self._is_url(info):
             self.url = info
+        elif self.street == "":
+            self.street = info
+        elif self.city == "":
+            if self._is_postcode_city(info):
+                self.split_save_code_city(info)
+            else:
+                self.city = info
+        elif self.country == "":
+            self.country = info
+
+    def sort_address(self, address: list[str]):
+        try:
+            self.street = address[0]
+
+            if self._is_postcode_city(address[1]):
+                self.split_save_code_city(address[1])
+                self.country = address[2]
+            elif len(address) == 4:
+                self.postcode = address[1]
+                self.city = address[2]
+                self.country = address[3]
+            else:
+                self.city = address[1]
+                self.country = address[2]
+        except IndexError:
+            pass
+
+
+    def _is_postcode_city(self, postcode: str):
+        split_address= postcode.split(' ', 1)
+        if len(split_address) < 2:
+            return False
+        return split_address[0].isdigit() and not split_address[1].isdigit()
 
 
     @staticmethod
@@ -69,11 +104,6 @@ class Exhibitor:
 
     @staticmethod
     def _is_url(info: str):
-        url_pattern = r'[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
-        return re.fullmatch(url_pattern, info)
-
-    @staticmethod
-    def _is_url(info: str):
-        url_pattern = r'[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
+        url_pattern = r'(https?:\/\/)?(www\.)?[-a-zA-Z0-9:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)'
         return re.fullmatch(url_pattern, info)
 

@@ -3,13 +3,12 @@ from selenium.common.exceptions import TimeoutException
 from tools.ToolsMesse import Tools, RunMode
 from tools.exhibitor import Exhibitor
 
-exhibitor_list_link = ""  
-tools = Tools(RunMode.TESTING)
+exhibitor_list_link = "https://www.klassikwelt-bodensee.de/messeinformation/ausstellerverzeichnis/ausstellerverzeichnis"
+tools = Tools(RunMode.RUN)
 
 
 def accept_cookies():
-    css_accept = ''  
-    tools.click_css_link(css_accept)
+    input("Accepted??")
 
 
 def get_exhibitor_links():
@@ -17,26 +16,37 @@ def get_exhibitor_links():
     if len(links) != 0:
         return links
 
-    # tools.scroll()
-    filter_str = ''
-    prefix = ''
-    links = [prefix + l for l in tools.find_links(filter_str=filter_str)]
+    links = get_links()
 
     tools.save_links(links)
     return links
 
 
+def get_links():
+    prefix = 'https://www.klassikwelt-bodensee.de'
+    filter_str = '/messeinformation/ausstellerverzeichnis/ausstellerverzeichnis\?'
+    links_letter = [prefix + l for l in tools.find_links(filter_str=filter_str)]
+
+    links = []
+    for link_letter in links_letter:
+        tools.open_link(link_letter)
+        filter_str = '/messeinformation/ausstellerverzeichnis/ausstellerverzeichnis/detail\?'
+        links += [prefix + l for l in tools.find_links(filter_str=filter_str)]
+
+    return links
+
+
 def parse_exhibitor(ex: Exhibitor):
-    css_name = ''  
-    css_street = ''  
-    css_postcode = ''  
-    css_city = ''  
-    css_country = ''  
-    css_url = ''  
-    css_info = ''  
-    css_tel = ''  
-    css_mail = ''  
-    css_fax = ''  
+    css_name = '#c78378 > div > div.row.elementTeaser > div.col-xs-12.col-sm-9 > h1'
+    css_street = ''
+    css_postcode = ''
+    css_city = ''
+    css_country = ''
+    css_url = ''
+    css_info = '#c78378 > div > div.elementKontakt > div > div.col-xs-12.col-sm-6.col-md-6.contactleft'
+    css_tel = ''
+    css_mail = ''
+    css_fax = ''
 
     ex.name = tools.get_information_from_css_link(css_name)
     ex.url = tools.get_information_from_css_link(css_url, timeout=0.5)
@@ -50,6 +60,9 @@ def parse_exhibitor(ex: Exhibitor):
     ex.country = tools.get_information_from_css_link(css_country, timeout=0.5)
 
     info = tools.get_information_from_css_link(css_info, timeout=0.5)
+
+    for inf in info.splitlines():
+        ex.sort_string(inf.replace('Telefon:', '').replace('Telefax:', ''))
 
     ex.add_info(info)
 
