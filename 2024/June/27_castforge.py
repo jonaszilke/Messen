@@ -52,7 +52,7 @@ if __name__ == "__main__":
             no_ex = 0
         except ElementClickInterceptedException:
             tools.log_error(f'{i}: {exhibitor.name}')
-        except TimeoutException:
+        except (IndexError, TimeoutException):
             tools.log_error(f'{i}: {exhibitor.name}')
             tools.back()
         except NoSuchElementException:
