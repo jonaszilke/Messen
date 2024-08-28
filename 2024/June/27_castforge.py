@@ -43,9 +43,9 @@ if __name__ == "__main__":
         try:
             css_link = f'#ed-list > div.ed-characterGroupWrapper > div:nth-child({j}) > div:nth-child({i}) > div > div > a'
             tools.scroll_css_into_view(css_link)
-            time.sleep(0.5)
+            time.sleep(1)
             tools.driver.execute_script("window.scrollBy(0, -100);")
-            time.sleep(0.5)
+            time.sleep(1)
             tools.click_css_link(css_link)
             parse_exhibitor(exhibitor)
             tools.back()
