@@ -1,18 +1,20 @@
-from datetime import datetime
-
-from selenium.common.exceptions import TimeoutException, ElementNotInteractableException
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.webdriver import Chrome, Edge, Firefox
-from selenium.webdriver.chrome.options import Options
-import time
-from bs4 import BeautifulSoup
-import re
 import inspect
 import os
+import re
+import time
+from datetime import datetime
 from enum import Enum
+
+from bs4 import BeautifulSoup
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import TimeoutException, ElementNotInteractableException
+from selenium.webdriver import Chrome, Edge, Firefox
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
 from config import browser_type
 from tools.exhibitor import Exhibitor
 
@@ -174,9 +176,15 @@ class Tools:
         self.driver.quit()
         self.driver = WebDriverFactory.create_driver(browser_type)
 
-    def scroll_into_view(self, css_link: str):
+    def scroll_css_into_view(self, css_link: str):
         element = self.driver.find_element(By.CSS_SELECTOR, css_link)
+        self.scroll_element_into_view(element)
+
+    def scroll_element_into_view(self, element: WebElement):
         self.driver.execute_script("arguments[0].scrollIntoView();", element)
+
+    def get_elements_by_css(self, css_link):
+        return self.driver.find_elements(By.CSS_SELECTOR, css_link)
 
 class WebDriverFactory:
     @staticmethod
