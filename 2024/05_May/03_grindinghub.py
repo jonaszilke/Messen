@@ -6,7 +6,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from tools.ToolsMesse import Tools, RunMode
 from tools.exhibitor import Exhibitor
 
-exhibitor_list_link = "https://www.messe-stuttgart.de/castforge/besucher/ausstellerverzeichnis#/"
+exhibitor_list_link = "https://www.grindinghub.de/besucher/ausstellerverzeichnis#/exhibitor/"
 tools = Tools(RunMode.RUN)
 
 
@@ -15,12 +15,18 @@ def accept_cookies():
 
 
 def parse_exhibitor(ex: Exhibitor):
-    css_info = '#detail-modal > div > div > div:nth-child(3) > div > div.ed-detail__segment.ed-detail__segment--contacts'
+    css_info = 'div.ed-contacts'
 
     data = tools.get_information_from_css_link(css_info, throw_exception=True).splitlines()
-    ex.name = data[1]
+    name = data[0]
+    name_split = name.split('|')
+    if len(name_split) == 2:
+        ex.name = name_split[1].strip()
+    else:
+        ex.name = name
 
-    for d in data[2:]:
+
+    for d in data[1:]:
         ex.sort_string(d)
 
     if tools.run_mode == RunMode.TESTING:
@@ -34,30 +40,30 @@ if __name__ == "__main__":
     tools.scroll()
     tools.driver.execute_script("window.scrollTo(0, 0);")
     time.sleep(3)
-    i = 2
+    i = 1
     j = 1
     no_ex = 0
     while True:
 
         exhibitor: Exhibitor = Exhibitor()
         try:
-            css_link = f'#ed-list > div.ed-characterGroupWrapper > div:nth-child({j}) > div:nth-child({i}) > div > div > a'
+            css_link = f'#ed-list > div.ed-characterGroupWrapper > div:nth-child({j}) > div > div:nth-child({i}) > div > div:nth-child(3) > a'
             tools.scroll_css_into_view(css_link)
-            time.sleep(1)
+            time.sleep(0.5)
             tools.driver.execute_script("window.scrollBy(0, -100);")
-            time.sleep(1)
+            time.sleep(0.5)
             tools.click_css_link(css_link)
             parse_exhibitor(exhibitor)
             tools.back()
             no_ex = 0
         except ElementClickInterceptedException:
             tools.log_error(f'{i}: {exhibitor.name}')
-        except (IndexError, TimeoutException):
+        except (TimeoutException, IndexError):
             tools.log_error(f'{i}: {exhibitor.name}')
             tools.back()
         except NoSuchElementException:
             j += 1
-            i = 1
+            i = 0
             no_ex += 1
         finally:
             tools.save_exhibitor(exhibitor)
