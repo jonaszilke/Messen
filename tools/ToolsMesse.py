@@ -29,7 +29,7 @@ class Tools:
     def __init__(self, run_mode=RunMode.TESTING):
         self.run_mode = run_mode
         self.driver = WebDriverFactory.create_driver(browser_type)
-        self.name = self.get_initial_script_name()
+        self.name = self._get_initial_script_name()
         self.file = self.init_file()
         self.link_file_path = fr'data\{self.name}_exhibitor_links.txt'
         self.log_file_path = fr'data\{self.name}_error_log.txt'
@@ -48,7 +48,8 @@ class Tools:
         file.write('Name\tStraße\tPLZ\tOrt\tLand\tTelefon\tFax\tE-Mail\tUrl\tInfo\n')
         return file
 
-    def get_initial_script_name(self):
+    @staticmethod
+    def _get_initial_script_name():
         stack = inspect.stack()
         for frame_info in reversed(stack):
             if frame_info.function == '<module>':

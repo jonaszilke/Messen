@@ -66,6 +66,10 @@ class Exhibitor:
         elif self.country == "":
             self.country = info
 
+    def sort_list(self, info: list[str]):
+        for i in info:
+            self.sort_string(i)
+
     def sort_address(self, address: list[str]):
         try:
             self.street = address[0]
