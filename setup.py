@@ -29,6 +29,7 @@ setup(
         'selenium==4.22.0',
         'urllib3==2.2.2',
         'webdriver-manager==4.0.1',
+        'tqdm'
     ],
 
     # Additional classifiers for your project
