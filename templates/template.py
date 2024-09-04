@@ -1,5 +1,3 @@
-from selenium.common.exceptions import TimeoutException
-
 from tools.ToolsMesse import Tools, RunMode
 from tools.exhibitor import Exhibitor
 
@@ -13,16 +11,12 @@ def accept_cookies():
 
 
 def get_exhibitor_links():
-    links = tools.get_saved_links()
-    if len(links) != 0:
-        return links
 
-    # tools.scroll()
+    links = []
     filter_str = ''
     prefix = ''
-    links = [prefix + l for l in tools.find_links(filter_str=filter_str)]
+    links += [prefix + l for l in tools.find_links(filter_str=filter_str)]
 
-    tools.save_links(links)
     return links
 
 
@@ -60,13 +54,5 @@ def parse_exhibitor(ex: Exhibitor):
 if __name__ == "__main__":
     tools.open_link(exhibitor_list_link)
     accept_cookies()
-    links = get_exhibitor_links()
-    for link in links:
-        exhibitor: Exhibitor = Exhibitor()
-        try:
-            tools.open_link(link)
-            parse_exhibitor(exhibitor)
-        except TimeoutException:
-            tools.log_error(link)
-        finally:
-            tools.save_exhibitor(exhibitor)
+    links = tools.get_links(get_exhibitor_links)
+    tools.iterate_exhibitor_links(links, parse_exhibitor)

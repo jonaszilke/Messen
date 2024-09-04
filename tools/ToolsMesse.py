@@ -14,6 +14,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from tqdm import tqdm
 
 from config import browser_type
 from tools.exhibitor import Exhibitor
@@ -63,7 +64,7 @@ class Tools:
 
     def click_css_link(self, css_link: str, timeout=None):
         timeout: int = timeout if timeout is not None else self.timeout
-        current_object = EC.presence_of_element_located((By.CSS_SELECTOR, css_link))
+        current_object = EC.element_to_be_clickable((By.CSS_SELECTOR, css_link))
         try:
             WebDriverWait(self.driver, timeout).until(current_object)
             self.driver.find_element(By.CSS_SELECTOR, css_link).click()
@@ -141,7 +142,6 @@ class Tools:
 
     def save_exhibitor(self, exhibitor: Exhibitor):
         self.file.write(str(exhibitor))
-        print(exhibitor.name)
 
     def log_error(self, message: str):
         with open(self.log_file_path, 'a', encoding='utf-8') as f:
@@ -158,11 +158,13 @@ class Tools:
         if os.path.exists(self.link_file_path):
             with open(self.link_file_path, 'r') as file:
                 links = [link.replace('\n', '') for link in file.readlines() if link != '\n']
+                links = list(set(links))
                 return links
         return []
 
     def save_links(self, links):
         with open(self.link_file_path, 'w') as file:
+            links = list(set(links))
             file.write('\n'.join(links))
 
     def wait_for_element(self, css_link: str, timeout=None):
@@ -186,6 +188,38 @@ class Tools:
 
     def get_elements_by_css(self, css_link):
         return self.driver.find_elements(By.CSS_SELECTOR, css_link)
+
+    def get_links(self, function, use_save_links=True):
+        links = self.get_saved_links() if use_save_links else []
+        if len(links) != 0:
+            return links
+
+        links = function()
+
+        self.save_links(links)
+        return links
+
+    def iterate_exhibitor_links(self, links: list[str], parse_exhibitor):
+        start_time = time.time()
+        print(f'Parse {len(links)} exhibitors')
+        with tqdm(total=len(links), position=0, leave=True, bar_format='{desc:<30}{percentage:1.0f}%|{bar:40}{r_bar}',
+                  colour='white') as pbar:
+            for link in links:
+                exhibitor: Exhibitor = Exhibitor()
+                try:
+                    self.open_link(link)
+                    parse_exhibitor(exhibitor)
+                except Exception:
+                    self.log_error(link)
+                finally:
+                    self.save_exhibitor(exhibitor)
+                    new_desc = exhibitor.name + (50 * ' ')
+                    pbar.set_description(new_desc[:50])
+                    pbar.update(1)
+
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(f"Time taken: {elapsed_time} seconds")
 
 class WebDriverFactory:
     @staticmethod
