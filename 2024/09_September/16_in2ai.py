@@ -42,9 +42,6 @@ def parse_exhibitor(ex: Exhibitor):
     ex.name = data[0]
     ex.sort_list(data)
 
-
-
-
     if tools.run_mode == RunMode.TESTING:
         print(str(ex))
 
@@ -54,7 +51,3 @@ if __name__ == "__main__":
     accept_cookies()
     links = tools.get_links(get_exhibitor_links)
     tools.iterate_exhibitor_links(links, parse_exhibitor)
-
-# https://osc.messe-dortmund.de/whdo/servlet/rubin.osc.bis.BisServlet?act=showdata&ipaeposExtid=K-937370789&fkCbWnr=557237603&ishop_id=AI24_AVZ&vs=2&t=0904173423&altIsvlIntId=BIS_SEARCH
-# https://osc.messe-dortmund.de/whdo/servlet/rubin.osc.bis.BisServlet?act=showdata&ipaeposExtid=K-927963661&fkCbWnr=557237603&ishop_id=AI24_AVZ&vs=2&t=0904173423&altIsvlIntId=BIS_SEARCH
-# https://osc.messe-dortmund.de/whdo/servlet/rubin.osc.bis.BisServlet?act=showdata&ipaeposExtid=K-954315659&fkCbWnr=557241163&ishop_id=AI24_AVZ&vs=1&t=0904173423&altIsvlIntId=BIS_SEARCH
