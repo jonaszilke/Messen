@@ -195,9 +195,11 @@ class Tools:
             return links
 
         links = function()
+        links_no_dupes = []
+        [links_no_dupes.append(i) for i in links if not links_no_dupes.count(i)] # remove duplicates
 
-        self.save_links(links)
-        return links
+        self.save_links(links_no_dupes)
+        return links_no_dupes
 
     def iterate_exhibitor_links(self, links: list[str], parse_exhibitor):
         start_time = time.time()

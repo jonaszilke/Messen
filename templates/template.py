@@ -32,18 +32,19 @@ def parse_exhibitor(ex: Exhibitor):
     css_mail = ''  
     css_fax = ''  
 
+    timeout = 0.1
     ex.name = tools.get_information_from_css_link(css_name)
-    ex.url = tools.get_information_from_css_link(css_url, timeout=0.5)
-    ex.tel = tools.get_information_from_css_link(css_tel, timeout=0.5)
-    ex.mail = tools.get_information_from_css_link(css_mail, timeout=0.5)
-    ex.fax = tools.get_information_from_css_link(css_fax, timeout=0.5)
+    ex.url = tools.get_information_from_css_link(css_url, timeout=0.1)
+    ex.tel = tools.get_information_from_css_link(css_tel, timeout=0.1)
+    ex.mail = tools.get_information_from_css_link(css_mail, timeout=0.1)
+    ex.fax = tools.get_information_from_css_link(css_fax, timeout=0.1)
 
-    ex.street = tools.get_information_from_css_link(css_street, timeout=0.5)
-    ex.postcode = tools.get_information_from_css_link(css_postcode, timeout=0.5)
-    ex.city = tools.get_information_from_css_link(css_city, timeout=0.5)
-    ex.country = tools.get_information_from_css_link(css_country, timeout=0.5)
+    ex.street = tools.get_information_from_css_link(css_street, timeout=0.1)
+    ex.postcode = tools.get_information_from_css_link(css_postcode, timeout=0.1)
+    ex.city = tools.get_information_from_css_link(css_city, timeout=0.1)
+    ex.country = tools.get_information_from_css_link(css_country, timeout=0.1)
 
-    info = tools.get_information_from_css_link(css_info, timeout=0.5)
+    info = tools.get_information_from_css_link(css_info, timeout=0.1)
 
     ex.add_info(info)
 
