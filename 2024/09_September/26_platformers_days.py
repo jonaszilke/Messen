@@ -1,39 +1,43 @@
 from tools.ToolsMesse import Tools, RunMode
 from tools.exhibitor import Exhibitor
 
-exhibitor_list_link = ""  
-tools = Tools(RunMode.TESTING)
+exhibitor_list_link = "https://ausstellerverzeichnis.platformers-days.de/vis/v1/de/directory/a"
+tools = Tools(RunMode.RUN)
 
 
 def accept_cookies():
-    css_accept = ''  
-    tools.click_css_link(css_accept)
+    input('Accept Cookies!!')
+
 
 
 def get_exhibitor_links():
 
     links = []
-    filter_str = ''
-    prefix = ''
-    links += [prefix + l for l in tools.find_links(filter_str=filter_str)]
+    filter_str = '/vis/v1/de/exhibitors/'
+    prefix = 'https://ausstellerverzeichnis.platformers-days.de'
+    import string
+    for letter in list(string.ascii_lowercase):
+        link = f'https://ausstellerverzeichnis.platformers-days.de/vis/v1/de/directory/{letter}?oid=250&lang=1'
+        tools.open_link(link)
+        links += [prefix + l for l in tools.find_links(filter_str=filter_str)]
 
     return links
 
 
 def parse_exhibitor(ex: Exhibitor):
-    css_name = ''  
-    css_street = ''  
-    css_postcode = ''  
-    css_city = ''  
-    css_country = ''  
-    css_url = ''  
-    css_info = ''  
-    css_tel = ''  
-    css_mail = ''  
-    css_fax = ''  
+    css_name = 'h1[itemprop="name"]'
+    css_street = 'span[itemprop="streetAddress"]'
+    css_postcode = 'span[itemprop="postalCode"]'
+    css_city = 'span[itemprop="addressLocality"]'
+    css_country = 'span[itemprop="addressCountry"]'
+    css_url = 'a[itemprop="url"]'
+    css_info = 'span[itemprop="streetAddress"]'
+    css_tel = 'span[itemprop="telephone"]'
+    css_mail = 'a[itemprop="email"]'
+    css_fax = 'span[itemprop="faxNumber"]'
 
     timeout = 0.1
-    ex.name = tools.get_information_from_css_link(css_name)
+    ex.name = tools.get_information_from_css_link(css_name, throw_exception=True)
     ex.url = tools.get_information_from_css_link(css_url, timeout=timeout)
     ex.tel = tools.get_information_from_css_link(css_tel, timeout=timeout)
     ex.mail = tools.get_information_from_css_link(css_mail, timeout=timeout)

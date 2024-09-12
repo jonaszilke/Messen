@@ -2,6 +2,7 @@ import inspect
 import os
 import re
 import time
+import sys
 from datetime import datetime
 from enum import Enum
 
@@ -140,7 +141,11 @@ class Tools:
             links.append(a['href'])
         return list(dict.fromkeys(links))
 
-    def save_exhibitor(self, exhibitor: Exhibitor):
+    def save_exhibitor(self, exhibitor: Exhibitor, print_name=True):
+        if self.run_mode == RunMode.TESTING:
+            print(str(exhibitor))
+        elif print_name:
+            print(exhibitor.name)
         self.file.write(str(exhibitor))
 
     def log_error(self, message: str):
@@ -196,7 +201,7 @@ class Tools:
 
         links = function()
         links_no_dupes = []
-        [links_no_dupes.append(i) for i in links if not links_no_dupes.count(i)] # remove duplicates
+        [links_no_dupes.append(i) for i in links if not links_no_dupes.count(i)]  # remove duplicates while keeping the order
 
         self.save_links(links_no_dupes)
         return links_no_dupes
@@ -204,8 +209,8 @@ class Tools:
     def iterate_exhibitor_links(self, links: list[str], parse_exhibitor):
         start_time = time.time()
         print(f'Parse {len(links)} exhibitors')
-        with tqdm(total=len(links), position=0, leave=True, bar_format='{desc:<30}{percentage:1.0f}%|{bar:40}{r_bar}',
-                  colour='white') as pbar:
+        with tqdm(total=len(links), position=0, leave=True, file=sys.stdout,
+                  bar_format='{desc:<30}{percentage:1.0f}%|{bar:40}{r_bar}') as pbar:
             for link in links:
                 exhibitor: Exhibitor = Exhibitor()
                 try:
@@ -214,14 +219,17 @@ class Tools:
                 except Exception:
                     self.log_error(link)
                 finally:
-                    self.save_exhibitor(exhibitor)
+                    self.save_exhibitor(exhibitor, print_name=False)
                     new_desc = exhibitor.name + (50 * ' ')
                     pbar.set_description(new_desc[:50])
                     pbar.update(1)
 
         end_time = time.time()
         elapsed_time = end_time - start_time
-        print(f"Time taken: {elapsed_time} seconds")
+        hours, rem = divmod(elapsed_time, 3600)
+        minutes, seconds = divmod(rem, 60)
+        print(f"Time taken: {int(hours)} hours, {int(minutes)} minutes, and {seconds:.2f} seconds")
+
 
 class WebDriverFactory:
     @staticmethod

@@ -56,6 +56,9 @@ class Exhibitor:
             self.mail = info
         elif self._is_url(info):
             self.url = info
+
+        elif self._is_postcode_city(info):
+            self.split_save_code_city(info)
         elif self.street == "":
             self.street = info
         elif self.city == "":
@@ -70,26 +73,45 @@ class Exhibitor:
         for i in info:
             self.sort_string(i)
 
+    def find_postcode_city(self, data: list[str]):
+        for i,d in enumerate(data):
+            if self._is_postcode_city(d):
+                return i
+        return -1
+
     def sort_address(self, address: list[str]):
-        try:
-            self.street = address[0]
+        city_index = self.find_postcode_city(address)
+        if city_index == -1:
+            try:
+                self.street = address[0]
 
-            if self._is_postcode_city(address[1]):
-                self.split_save_code_city(address[1])
-                self.country = address[2]
-            elif len(address) == 4:
-                self.postcode = address[1]
-                self.city = address[2]
-                self.country = address[3]
-            else:
-                self.city = address[1]
-                self.country = address[2]
-        except IndexError:
-            pass
+                if self._is_postcode_city(address[1]):
+                    self.split_save_code_city(address[1])
+                    self.country = address[2]
+                elif len(address) == 4:
+                    self.postcode = address[1]
+                    self.city = address[2]
+                    self.country = address[3]
+                else:
+                    self.city = address[1]
+                    self.country = address[2]
+            except IndexError:
+                pass
+        else:
+            self.split_save_code_city(address[city_index])
+            try:
+                self.street = address[city_index-1]
+            except IndexError:
+                pass
+            try:
+                self.country = address[city_index + 1]
+            except IndexError:
+                pass
 
-
-    def _is_postcode_city(self, postcode: str):
-        split_address= postcode.split(' ', 1)
+    @staticmethod
+    def _is_postcode_city(postcode: str):
+        postcode_temp = postcode[2:] if postcode[0:2] == 'D-' else postcode
+        split_address = postcode_temp.split(' ', 1)
         if len(split_address) < 2:
             return False
         return split_address[0].isdigit() and not split_address[1].isdigit()
