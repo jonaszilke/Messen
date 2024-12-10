@@ -168,7 +168,7 @@ class Tools:
         return []
 
     def save_links(self, links):
-        with open(self.link_file_path, 'w') as file:
+        with open(self.link_file_path, 'w', encoding="utf-8") as file:
             links = list(set(links))
             file.write('\n'.join(links))
 
