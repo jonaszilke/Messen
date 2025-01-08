@@ -79,46 +79,53 @@ class Tools:
             # just for clearance
             raise ElementNotInteractableException
 
-    def get_information_from_css_link(self, css_link, throw_exception=False, timeout=None):
-        if css_link == "":
-            return ""
-        timeout: int = timeout if timeout is not None else self.timeout
-        try:
-            element_present = EC.presence_of_element_located((By.CSS_SELECTOR, css_link))
-            WebDriverWait(self.driver, timeout).until(element_present)
-            return self.driver.find_element(By.CSS_SELECTOR, css_link).text
-        except TimeoutException as e:
-            if throw_exception:
-                if self.run_mode == RunMode.DEBUG:
-                    print(e)
-                raise e
-            else:
-                if self.run_mode == RunMode.DEBUG:
-                    print("TIMEOUT")
-        except NoSuchElementException as e:
-            if throw_exception:
-                raise e
-            else:
-                if self.run_mode == RunMode.DEBUG:
-                    print("NO_SUCH_ELEMENT")
-        return ""
+    def get_information_from_css_link(self, css_link, throw_exception=False, timeout=None) -> str:
+        return self.get_information(By.CSS_SELECTOR, css_link, throw_exception, timeout)
 
-    def get_href_from_css_link(self, css_link, throw_exception=False, timeout=None):
-        timeout: int = timeout if timeout is not None else self.timeout
+    def get_information_from_xpath(self, xpath, throw_exception=False, timeout=None) -> str:
+        return self.get_information(By.XPATH, xpath, throw_exception, timeout)
+
+    def get_information(self, selector: str, link, throw_exception=False, timeout=None) -> str:
+        if link == "":
+            return ''
         try:
-            element_present = EC.presence_of_element_located((By.CSS_SELECTOR, css_link))
-            WebDriverWait(self.driver, timeout).until(element_present)
-            return self.driver.find_element(By.CSS_SELECTOR, css_link).get_attribute("href")
-        except TimeoutException as e:
+            element = self.find_element(selector, link, timeout)
+            return element.text
+        except (TimeoutException, NoSuchElementException) as e:
             if throw_exception:
                 raise e
             else:
-                if self.run_mode == RunMode.DEBUG:
-                    print("TIMEOUT")
-        except NoSuchElementException as e:
-            if self.run_mode == RunMode.DEBUG:
-                print("NO_SUCH_ELEMENT")
-        return ""
+                return ''
+
+    def get_href_from_css_link(self, css_link, throw_exception=False, timeout=None) -> str:
+        return self.get_href(By.CSS_SELECTOR, css_link, throw_exception, timeout)
+
+    def get_href_from_xpath(self, xpath, throw_exception=False, timeout=None) -> str:
+        return self.get_href(By.XPATH, xpath, throw_exception, timeout)
+
+    def get_href(self, selector: str, link, throw_exception=False, timeout=None) -> str:
+        if link == "":
+            return ''
+        try:
+            element = self.find_element(selector, link, timeout)
+            return element.get_attribute("href")
+        except (TimeoutException, NoSuchElementException) as e:
+            if throw_exception:
+                raise e
+            else:
+                return ''
+
+    def find_element(self, selector: str, link, timeout=None) -> WebElement:
+        timeout: int = timeout if timeout is not None else self.timeout
+        strategies = [getattr(By, attr) for attr in dir(By) if not attr.startswith("__")]
+        if selector not in strategies:
+            raise ValueError(f"Invalid selector: '{selector}'. Must be one the selectors defined in the By class.")
+        try:
+            element_present = EC.presence_of_element_located((selector, link))
+            WebDriverWait(self.driver, timeout).until(element_present)
+            return self.driver.find_element(By.CSS_SELECTOR, link)
+        except (TimeoutException, NoSuchElementException) as e:
+            raise e
 
     def scroll(self, timeout=3):
         lenOfPage = self.driver.execute_script(
@@ -146,7 +153,9 @@ class Tools:
             print(str(exhibitor))
         elif print_name:
             print(exhibitor.name)
-        self.file.write(str(exhibitor))
+
+        if exhibitor.name != '':
+            self.file.write(str(exhibitor))
 
     def log_error(self, message: str):
         with open(self.log_file_path, 'a', encoding='utf-8') as f:
@@ -190,6 +199,9 @@ class Tools:
 
     def scroll_element_into_view(self, element: WebElement):
         self.driver.execute_script("arguments[0].scrollIntoView();", element)
+        time.sleep(0.5)
+        self.driver.execute_script("window.scrollBy(0, -200);")
+        time.sleep(0.5)
 
     def get_elements_by_css(self, css_link):
         return self.driver.find_elements(By.CSS_SELECTOR, css_link)
@@ -201,7 +213,8 @@ class Tools:
 
         links = function()
         links_no_dupes = []
-        [links_no_dupes.append(i) for i in links if not links_no_dupes.count(i)]  # remove duplicates while keeping the order
+        [links_no_dupes.append(i) for i in links if
+         not links_no_dupes.count(i)]  # remove duplicates while keeping the order
 
         self.save_links(links_no_dupes)
         return links_no_dupes
