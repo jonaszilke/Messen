@@ -3,7 +3,7 @@ from selenium.common.exceptions import TimeoutException
 from tools.ToolsMesse import Tools, RunMode
 from tools.exhibitor import Exhibitor
 
-exhibitor_list_link = "https://www.surface-technology-germany.de/de/ausstellung/ausstellerliste/?letter=a"
+exhibitor_list_link = "https://www.meine-infa.de/de/ausstellung/ausstellerliste/?letter=a"
 tools = Tools(RunMode.RUN)
 
 
@@ -13,19 +13,14 @@ def accept_cookies():
 
 
 def get_exhibitor_links():
-    links = tools.get_saved_links()
-    if len(links) != 0:
-        return links
-
+    links = []
     import string
     for letter in list(string.ascii_lowercase) + ['numbers', 'others']:
-        ex_link = f'https://www.surface-technology-germany.de/de/ausstellung/ausstellerliste/?letter={letter}'
+        ex_link = f'https://www.meine-infa.de/de/ausstellung/ausstellerliste/?letter={letter}'
         tools.open_link(ex_link)
         filter_str = '/aussteller/'
-        prefix = 'https://www.surface-technology-germany.de'
+        prefix = 'https://www.meine-infa.de'
         links += [prefix + l for l in tools.find_links(filter_str=filter_str)]
-
-    tools.save_links(links)
     return links
 
 
@@ -54,13 +49,5 @@ def parse_exhibitor(ex: Exhibitor):
 if __name__ == "__main__":
     tools.open_link(exhibitor_list_link)
     accept_cookies()
-    links = get_exhibitor_links()
-    for link in links:
-        exhibitor: Exhibitor = Exhibitor()
-        try:
-            tools.open_link(link)
-            parse_exhibitor(exhibitor)
-        except TimeoutException:
-            tools.log_error(link)
-        finally:
-            tools.save_exhibitor(exhibitor)
+    links = tools.get_links(get_exhibitor_links)
+    tools.iterate_exhibitor_links(links, parse_exhibitor)

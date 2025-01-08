@@ -14,8 +14,6 @@ def accept_cookies():
 
 
 def get_exhibitor_links():
-    css_name = '#__next > div.MuiBox-root.css-g9qx4c > main > div > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-8.MuiGrid-grid-lg-9.css-vhv0fi > div > div.MuiBox-root.css-0 > div.MuiGrid-root.MuiGrid-container.MuiGrid-spacing-xs-2.css-1fxdrvb > div:nth-child(1) > div > div.MuiBox-root.css-79elbk > a'
-    css_name = '#__next > div.MuiBox-root.css-g9qx4c > main > div > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-8.MuiGrid-grid-lg-9.css-vhv0fi > div > div.MuiBox-root.css-0 > div.MuiGrid-root.MuiGrid-container.MuiGrid-spacing-xs-2.css-1fxdrvb > div:nth-child(2) > div > div.MuiBox-root.css-79elbk > a'
     filter_str = '/newfront/exhibitor/'
     prefix = 'https://connect.buchmesse.de'
     links = []

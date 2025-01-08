@@ -43,7 +43,7 @@ def parse_exhibitor(ex: Exhibitor):
 
 
 def get_letter_buttons():
-    parent_div = tools.driver.find_element(By.CSS_SELECTOR, 'div.flex.flex-wrap.mt-4.gap-x-4.gap-y-3')
+    parent_div = tools.driver.find_element(By.CSS_SELECTOR, 'div.flex.flex-wrap.mt-4.gap-x-4.gap-y-3', )
     buttons = parent_div.find_elements(By.TAG_NAME, 'button')
     filtered_buttons = [button for button in buttons if button.get_attribute('class') == '']
     return filtered_buttons

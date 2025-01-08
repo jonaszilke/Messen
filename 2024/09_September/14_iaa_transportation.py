@@ -62,7 +62,7 @@ def parse_exhibitor(ex: Exhibitor):
         print(str(ex))
 
 def scroll_element(css_link):
-    scrollable_element = tools.driver.find_element(By.CSS_SELECTOR, css_link)
+    scrollable_element = tools.driver.find_element(By.CSS_SELECTOR, css_link, )
     element_size = scrollable_element.size
     scroll_x = element_size['width'] // 2
     scroll_y = element_size['height'] // 2

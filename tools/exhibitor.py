@@ -80,6 +80,8 @@ class Exhibitor:
         return -1
 
     def sort_address(self, address: list[str]):
+        for idx, a in enumerate(address):
+            address[idx] = a.strip()
         city_index = self.find_postcode_city(address)
         if city_index == -1:
             try:
