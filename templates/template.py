@@ -6,8 +6,11 @@ tools = Tools(RunMode.TESTING)
 
 
 def accept_cookies():
-    css_accept = ''  
-    tools.click_css_link(css_accept)
+    css_accept = ''
+    try:
+        tools.click_css_link(css_accept)
+    except:
+        input('Accept Cookies manually!!!')
 
 
 def get_exhibitor_links():

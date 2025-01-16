@@ -112,7 +112,7 @@ class Exhibitor:
 
     @staticmethod
     def _is_postcode_city(postcode: str):
-        postcode_temp = postcode[2:] if postcode[0:2] == 'D-' else postcode
+        postcode_temp = postcode[2:].strip() if postcode[0:2] in ['D-', 'DE', 'De'] else postcode
         split_address = postcode_temp.split(' ', 1)
         if len(split_address) < 2:
             return False

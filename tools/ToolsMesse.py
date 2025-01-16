@@ -1,4 +1,5 @@
 import inspect
+import json
 import os
 import re
 import time
@@ -15,6 +16,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+
 from tqdm import tqdm
 
 from config import browser_type
@@ -32,23 +36,27 @@ class Tools:
         self.run_mode = run_mode
         self.driver = WebDriverFactory.create_driver(browser_type)
         self.name = self._get_initial_script_name()
-        self.file = self.init_file()
+        self.data_file_path = fr'data\{self.get_file_name()}.txt'
+        self.init_file(self.data_file_path)
         self.link_file_path = fr'data\{self.name}_exhibitor_links.txt'
         self.log_file_path = fr'data\{self.name}_error_log.txt'
+        self.cookie_path = fr'data\{self.name}_cookies.json'
+        self.local_storage_path = fr'data\{self.name}_local_storage.json'
         self.timeout = 10
 
     def __del__(self):
         self.driver.quit()
-        self.file.close()
 
-    def init_file(self):
-        if not os.path.exists('data'):
-            os.makedirs('data')
+    def get_file_name(self):
         time_string = datetime.now().strftime('%Y%m%d_%H%M')
         file_name = self.name if self.run_mode != RunMode.RUN else f'{self.name}_full_{time_string}'
-        file = open(fr'data\{file_name}.txt', 'w', encoding='utf-8')
-        file.write('Name\tStraße\tPLZ\tOrt\tLand\tTelefon\tFax\tE-Mail\tUrl\tInfo\n')
-        return file
+        return file_name
+
+    def init_file(self, path):
+        if not os.path.exists('data'):
+            os.makedirs('data')
+        with open(path, 'w', encoding='utf-8') as file:
+            file.write('Name\tStraße\tPLZ\tOrt\tLand\tTelefon\tFax\tE-Mail\tUrl\tInfo\n')
 
     @staticmethod
     def _get_initial_script_name():
@@ -78,6 +86,46 @@ class Tools:
         except ElementNotInteractableException:
             # just for clearance
             raise ElementNotInteractableException
+
+    def click_xpath(self, xpath: str, timeout=None):
+        timeout: int = timeout if timeout is not None else self.timeout
+        current_object = EC.element_to_be_clickable((By.XPATH, xpath))
+        try:
+            WebDriverWait(self.driver, timeout).until(current_object)
+            self.driver.find_element(By.XPATH, xpath).click()
+        except NoSuchElementException:
+            element = self.driver.find_element(By.XPATH, xpath)
+            self.driver.execute_script("arguments[0].click();", element)
+            raise NoSuchElementException
+        except TimeoutException:
+            raise TimeoutException
+        except ElementNotInteractableException:
+            # just for clearance
+            raise ElementNotInteractableException
+
+    def open_in_new_tab_css_link(self, css_link: str, timeout=None):
+
+        element = self.driver.find_element(By.CSS_SELECTOR, css_link)
+        self.open_in_new_tab_element(element, timeout)
+
+    def open_in_new_tab_element(self, element, timeout=None):
+        timeout: int = timeout if timeout is not None else self.timeout
+        WebDriverWait(self.driver, timeout).until(EC.element_to_be_clickable(element))
+
+        actions = ActionChains(self.driver)
+        actions.move_to_element(element).key_down(Keys.CONTROL).click(element).key_up(Keys.CONTROL).perform()
+
+        WebDriverWait(self.driver, timeout).until(
+            lambda d: len(d.window_handles) > 1
+        )
+        self.switch_tab()
+
+    def switch_tab(self, tab_number=-1):
+        window_handles = self.driver.window_handles
+        self.driver.switch_to.window(window_handles[tab_number])
+
+    def close_tab(self):
+        self.driver.close()
 
     def get_information_from_css_link(self, css_link, throw_exception=False, timeout=None) -> str:
         return self.get_information(By.CSS_SELECTOR, css_link, throw_exception, timeout)
@@ -155,7 +203,8 @@ class Tools:
             print(exhibitor.name)
 
         if exhibitor.name != '':
-            self.file.write(str(exhibitor))
+            with open(self.data_file_path, 'a', encoding='utf-8') as file:
+                file.write(str(exhibitor))
 
     def log_error(self, message: str):
         with open(self.log_file_path, 'a', encoding='utf-8') as f:
@@ -193,15 +242,15 @@ class Tools:
         self.driver.quit()
         self.driver = WebDriverFactory.create_driver(browser_type)
 
-    def scroll_css_into_view(self, css_link: str):
+    def scroll_css_into_view(self, css_link: str, sleep_time=1):
         element = self.driver.find_element(By.CSS_SELECTOR, css_link)
-        self.scroll_element_into_view(element)
+        self.scroll_element_into_view(element, sleep_time=sleep_time)
 
-    def scroll_element_into_view(self, element: WebElement):
+    def scroll_element_into_view(self, element: WebElement, sleep_time=1):
         self.driver.execute_script("arguments[0].scrollIntoView();", element)
-        time.sleep(0.5)
-        self.driver.execute_script("window.scrollBy(0, -200);")
-        time.sleep(0.5)
+        time.sleep(sleep_time)
+        self.driver.execute_script("window.scrollBy(0, -300);")
+        time.sleep(sleep_time)
 
     def get_elements_by_css(self, css_link):
         return self.driver.find_elements(By.CSS_SELECTOR, css_link)
@@ -242,6 +291,22 @@ class Tools:
         hours, rem = divmod(elapsed_time, 3600)
         minutes, seconds = divmod(rem, 60)
         print(f"Time taken: {int(hours)} hours, {int(minutes)} minutes, and {seconds:.2f} seconds")
+
+    def save_local_storage(self):
+        local_storage = self.driver.execute_script("return {...localStorage};")
+        with open(self.local_storage_path, 'w') as file:
+            json.dump(local_storage, file)
+
+    def load_local_storage(self):
+        if not os.path.exists(self.local_storage_path):
+            return False
+
+        with open(self.local_storage_path, "r") as file:
+            local_storage = json.load(file)
+        for key, value in local_storage.items():
+            self.driver.execute_script(f"localStorage.setItem('{key}', '{value}');")
+        return True
+
 
 
 class WebDriverFactory:

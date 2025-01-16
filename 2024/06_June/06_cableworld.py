@@ -59,13 +59,5 @@ def split_info(exhibitor: Exhibitor, data: str):
 if __name__ == "__main__":
     tools.open_link("https://www.cablecarworld.de/urbane-seilbahnen/ausstellerliste/?country=de")
     accept_cookies()
-    links = get_exhibitor_links()
-    for link in links:
-        try:
-            tools.open_link(link)
-            exhibitor: Exhibitor = parse_exhibitor()
-            tools.file.write(str(exhibitor))
-            print(exhibitor.name)
-        except TimeoutException as e:
-            with open("cableworld_exceptions.txt", "a") as f:
-                f.write(link + "\n")
+    links = tools.get_links(get_exhibitor_links())
+    tools.iterate_exhibitor_links(links, parse_exhibitor())
