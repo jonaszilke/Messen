@@ -52,8 +52,8 @@ class Exhibitor:
             return
         if self._is_phone(info):
             self.add_tel_or_fax(info)
-        elif self._is_mail(info):
-            self.mail = info
+        elif self._is_mail(info.replace('mailto:', '')):
+            self.mail = info.replace('mailto:', '')
         elif self._is_url(info):
             self.url = info
 

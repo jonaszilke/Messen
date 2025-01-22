@@ -225,8 +225,9 @@ class Tools:
                 return links
         return []
 
-    def save_links(self, links):
-        with open(self.link_file_path, 'w', encoding="utf-8") as file:
+    def save_links(self, links, path=None):
+        path = self.link_file_path if path is None else path
+        with open(path, 'w', encoding="utf-8") as file:
             links = list(set(links))
             file.write('\n'.join(links))
 
@@ -250,7 +251,7 @@ class Tools:
         self.driver.execute_script("arguments[0].scrollIntoView();", element)
         time.sleep(sleep_time)
         self.driver.execute_script("window.scrollBy(0, -300);")
-        time.sleep(sleep_time)
+        time.sleep(1)
 
     def get_elements_by_css(self, css_link):
         return self.driver.find_elements(By.CSS_SELECTOR, css_link)
