@@ -11,9 +11,7 @@ This project contains a bunch of webscraping scripts, that are used to get infor
 
 ## Description
 
-You can find example files in the ```./2024/June``` directory.
-Please use the files ```cableworld.py```, ```chemspec.py``` and ```deutschevet.py``` as orientation.
-There are also templates for new exhibition-scripts in ```./templates/...```.
+TODO
 
 ## Installation
 
